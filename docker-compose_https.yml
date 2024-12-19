@@ -1,0 +1,40 @@
+services:
+  frontend:
+    restart: always
+    image: svp_frontend
+    build: ./merck-naive
+    #command: /bin/sh -c "npm run build && serve -s dist -l 3000"
+    ports:
+      - "3000:3000"
+    # volumes:
+     #- ./Svp.vue:/app/src/components/Svp.vue
+    networks:
+      - app-network
+
+  backend:
+    restart: always
+    image: svp_backend
+    build: ./backend
+    volumes:
+      - ./main.db/:/app/main.db
+      - ./static/:/app/static/
+    ports:
+      - "8000:8000" 
+    networks:
+      - app-network
+
+  nginx:
+    restart: always
+    image: nginx:alpine
+    ports:
+      - "0.0.0.0:443:443"
+    volumes:
+      - ./nginx_https.conf:/etc/nginx/conf.d/default.conf
+      - ./test.crt:/etc/nginx/ssl/test.crt
+      - ./test.key:/etc/nginx/ssl/test.key
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
